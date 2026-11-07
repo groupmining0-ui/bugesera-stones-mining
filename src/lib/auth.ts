@@ -1,8 +1,8 @@
-import NextAuth from "next-auth";
+﻿import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { db, ensureAdminUser } from "@/lib/db";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -16,6 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: { email: {}, password: {} },
       async authorize(raw) {
+        await ensureAdminUser();
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const user = await db.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });

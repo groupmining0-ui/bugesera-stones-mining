@@ -57,6 +57,30 @@ model User {
   orders Order[]
 }
 
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  department String?
+  email     String?
+  phone     String?
+  imageUrl  String?
+  bio       String?
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Equipment {
+  id        String   @id @default(cuid())
+  name      String
+  job       String
+  imageUrl  String?
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model Product {
   id          String          @id @default(cuid())
   slug        String          @unique

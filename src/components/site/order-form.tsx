@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { ProductPicker, type PickedItem } from "@/components/site/product-picker";
 import { readCartFromStorage } from "@/components/site/cart";
 
 export function OrderForm() {
-  const [items, setItems] = useState<PickedItem[]>([]);
+  const [items, setItems] = useState<PickedItem[]>(() =>
+    readCartFromStorage().map((item) => ({ productId: item.id, quantity: item.quantity }))
+  );
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    const savedItems = readCartFromStorage().map((item) => ({ productId: item.id, quantity: item.quantity }));
-    if (savedItems.length > 0) {
-      setItems(savedItems);
-    }
-  }, []);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

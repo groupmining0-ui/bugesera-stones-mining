@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatRwf } from "@/lib/utils";
@@ -59,11 +59,7 @@ function saveCartToStorage(cart: CartEntry[]) {
 }
 
 export function useCart() {
-  const [cart, setCart] = useState<CartEntry[]>([]);
-
-  useEffect(() => {
-    setCart(readCartFromStorage());
-  }, []);
+  const [cart, setCart] = useState<CartEntry[]>(() => readCartFromStorage());
 
   const commitCart = (nextCart: CartEntry[]) => {
     setCart(nextCart);

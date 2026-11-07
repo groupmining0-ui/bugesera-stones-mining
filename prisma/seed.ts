@@ -1,10 +1,14 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import bcrypt from "bcryptjs";
 import mariadb from "mariadb";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../src/generated/prisma/client";
 
-const connectionString = process.env.DATABASE_URL ?? "mysql://root:root@localhost:3306/bugesera";
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is required. Add it to your .env file or deployment environment before running the seed script.");
+}
+
 const url = new URL(connectionString);
 const pool = mariadb.createPool({
   host: url.hostname,
@@ -27,7 +31,6 @@ const productImages = [
   "/hero/stone-5.jpg",
 ];
 
-// Prices are intentionally left empty: set real prices in /admin once the quarry is producing.
 const products = [
   ["undressed-building-stone", "Undressed building stone", "BUILDING_STONE", "Walls and general building", "Mixed sizes"],
   ["dressed-building-stone", "Dressed building stone", "BUILDING_STONE", "Walls and facades", "Hand or machine dressed"],

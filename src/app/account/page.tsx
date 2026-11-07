@@ -16,6 +16,7 @@ export default async function Account({ searchParams }: { searchParams: Promise<
   const [session, locale] = await Promise.all([auth(), getLocale()]);
   const t = dictionary[locale];
   if (!session?.user) redirect("/login?next=/account");
+  if (session.user.role === "ADMIN") redirect("/admin");
   const { paid } = await searchParams;
 
   const [orders, quotes] = await Promise.all([
