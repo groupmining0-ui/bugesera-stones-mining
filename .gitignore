@@ -1,52 +1,11 @@
-# Dependencies
-/node_modules
-/.pnp
-.pnp.js
-
-# Next.js build output
-/.next/
-/out/
-
-# Production build artifacts
-/build
-/dist
-
-# Environment variables
+node_modules/
+.next/
+out/
+build/
+dist/
+.vercel/
 .env
-.env*.local
-.env.production
-.env.staging
-.env.test
+.env.*
 !.env.example
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Runtime / diagnostic logs
-.next/dev/logs/
 *.log
-
-# Deployment
-.vercel
-
-# Operating System files
-.DS_Store
-Thumbs.db
-*.sublime-project
-*.sublime-workspace
-.idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-
-# TypeScript cache
 *.tsbuildinfo
-next-env.d.ts
-
-# User uploaded files (keeps directory structure via .gitkeep)
-/public/uploads/*
-!/public/uploads/.gitkeep
