@@ -48,6 +48,7 @@ type TeamMemberRecord = {
   role: string;
   department?: string | null;
   email?: string | null;
+  phone?: string | null;
   bio?: string | null;
   imageUrl?: string | null;
   active?: boolean;
@@ -67,11 +68,12 @@ type EquipmentRecord = {
 
 type TeamMemberModel = {
   findMany: (args: {
-    where?: { active?: boolean };
+    where?: { active?: boolean; name?: string };
     orderBy?: Array<{ order?: "asc" | "desc" } | { createdAt?: "asc" | "desc" }>;
   }) => Promise<TeamMemberRecord[]>;
   count: () => Promise<number>;
   create: (args: { data: Record<string, unknown> }) => Promise<unknown>;
+  update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown>;
   delete: (args: { where: { id: string } }) => Promise<unknown>;
 };
 
@@ -120,11 +122,11 @@ export async function getActiveEquipment(): Promise<EquipmentRecord[]> {
 }
 
 const defaultStaffMembers = [
-  { name: "Patrick Tuyisenge Sebarera", role: "Managing Director", department: "Leadership", email: "patrick@bugeserastoneworks.rw", imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80", bio: "Leads company strategy and long-term growth.", active: true },
-  { name: "Aline Mukamana", role: "Operations Manager", department: "Operations", email: "aline@bugeserastoneworks.rw", imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80", bio: "Coordinates quarry and plant operations.", active: true },
-  { name: "Jean Bosco Niyonzima", role: "Mining / Quarry Engineer", department: "Production", email: "jean@bugeserastoneworks.rw", imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80", bio: "Plans extraction and production quality control.", active: true },
-  { name: "Diane Uwase", role: "Sales & Marketing Officer", department: "Sales", email: "diane@bugeserastoneworks.rw", imageUrl: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80", bio: "Builds customer relationships and delivery planning.", active: true },
-  { name: "Eric Mugisha", role: "Maintenance Technician", department: "Maintenance", email: "eric@bugeserastoneworks.rw", imageUrl: "https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=900&q=80", bio: "Maintains crushing and screening equipment.", active: true },
+  { name: "NTWARI ANTOINE JOYEUX", role: "Founder", department: "Leadership", email: "new.antomix@gmail.com", phone: "+250 796 893 372", imageUrl: "/staff/intwali-founder.jpg", bio: "Founder of the business and strategic leader.", active: true },
+  { name: "PANZATA EMELYNE", role: "Chief Executive Officer (CEO)", department: "Leadership", email: "emelynepanzata@gmail.com", phone: null, imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80", bio: "Leads corporate direction and business growth.", active: true },
+  { name: "To be appointed", role: "Operations Manager", department: "Operations", email: null, phone: null, imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=900&q=80", bio: "Oversees daily business operations.", active: true },
+  { name: "SEBERA PATRICK", role: "IT Officer", department: "Information Technology", email: "patrick@bugeserastoneworks.rw", phone: null, imageUrl: "/staff/sebera-patrick.png", bio: "Technology, systems and technical support.", active: true },
+  { name: "To be appointed", role: "Finance & Administration", department: "Finance & Administration", email: null, phone: null, imageUrl: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80", bio: "Supports accounting, finance and administration functions.", active: true },
 ] as const;
 
 const defaultEquipment = [
@@ -142,7 +144,27 @@ export async function ensureDefaultStaffMembers() {
   if (!teamMemberModel) return;
 
   const count = await teamMemberModel.count();
-  if (count > 0) return;
+  if (count > 0) {
+    const existingMembers = await teamMemberModel.findMany({});
+    for (const member of defaultStaffMembers) {
+      const match = existingMembers.find((existing) => existing.name.trim().toLowerCase() === member.name.trim().toLowerCase());
+      if (!match) continue;
+
+      await teamMemberModel.update({
+        where: { id: match.id },
+        data: {
+          role: member.role,
+          department: member.department,
+          email: member.email,
+          phone: member.phone,
+          imageUrl: member.imageUrl,
+          bio: member.bio,
+          active: member.active,
+        },
+      });
+    }
+    return;
+  }
 
   await Promise.all(
     defaultStaffMembers.map((member, index) =>
@@ -152,6 +174,7 @@ export async function ensureDefaultStaffMembers() {
           role: member.role,
           department: member.department,
           email: member.email,
+          phone: member.phone,
           imageUrl: member.imageUrl,
           bio: member.bio,
           active: member.active,

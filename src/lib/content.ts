@@ -7,9 +7,10 @@ export const company = {
     "To be one of the strongest stone industries in Rwanda and East Africa, from quarrying to finished construction materials.",
   mission:
     "To supply quality construction materials at competitive prices, using modern technology and adding value to natural resources.",
-  phone: "+250 788 123 456",
-  email: "info@bugeserastoneworks.rw",
-  whatsapp: "250788123456",
+  phone: "+250 796 893 372",
+  email: "new.antomix@gmail.com",
+  whatsapp: "250796893372",
+  whatsappAlternate: "+971 52 387 0096",
 };
 
 export type Category = {

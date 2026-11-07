@@ -6,6 +6,16 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const dynamic = "force-dynamic";
 
+function isReadOnlyFilesystemError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const code = (error as NodeJS.ErrnoException).code;
+  return code === "EROFS" || /read-only|readonly/i.test(error.message);
+}
+
+function toDataUrl(contentType: string, buffer: Buffer) {
+  return `data:${contentType};base64,${buffer.toString("base64")}`;
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -58,25 +68,34 @@ export async function POST(request: Request) {
       }
     }
 
-    // Local filesystem storage under public/uploads
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadsDir, { recursive: true });
+    // Local filesystem storage under public/uploads. Some production hosts (e.g. serverless) mount
+    // the workdir read-only, so we gracefully fall back to a data URI instead of failing the upload.
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      await fs.mkdir(uploadsDir, { recursive: true });
 
-    const rawExt = path.extname(file.name) || ".jpg";
-    const ext = rawExt.toLowerCase();
-    const cleanBase = path
-      .basename(file.name, rawExt)
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, "-")
-      .replace(/-+/g, "-")
-      .slice(0, 40) || "image";
+      const rawExt = path.extname(file.name) || ".jpg";
+      const ext = rawExt.toLowerCase();
+      const cleanBase = path
+        .basename(file.name, rawExt)
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, "-")
+        .replace(/-+/g, "-")
+        .slice(0, 40) || "image";
 
-    const uniqueFilename = `${cleanBase}-${Date.now()}${ext}`;
-    const destinationPath = path.join(uploadsDir, uniqueFilename);
+      const uniqueFilename = `${cleanBase}-${Date.now()}${ext}`;
+      const destinationPath = path.join(uploadsDir, uniqueFilename);
 
-    await fs.writeFile(destinationPath, buffer);
+      await fs.writeFile(destinationPath, buffer);
+      return NextResponse.json({ url: `/uploads/${uniqueFilename}` });
+    } catch (localError) {
+      if (!isReadOnlyFilesystemError(localError)) {
+        throw localError;
+      }
 
-    return NextResponse.json({ url: `/uploads/${uniqueFilename}` });
+      console.warn("Local upload failed because the filesystem is read-only. Falling back to a data URL.", localError);
+      return NextResponse.json({ url: toDataUrl(file.type || "image/jpeg", buffer) });
+    }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Upload failed";
     console.error("Upload error:", err);

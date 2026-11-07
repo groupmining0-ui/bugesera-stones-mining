@@ -29,7 +29,7 @@ Generate `AUTH_SECRET` with `npx auth secret`.
 ## Services to set up
 
 1. **PostgreSQL**: Neon, Supabase, Railway or Vercel Postgres. Put the URL in `DATABASE_URL`.
-2. **Cloudinary**: create a free account; copy cloud name, API key and secret.
+2. **Cloudinary**: create a free account; copy cloud name, API key and secret. This is the recommended production storage for image uploads because serverless deployments often mount the filesystem read-only.
 3. **Flutterwave**: create an account, enable Rwanda (RWF, MTN MoMo, Airtel Money, cards). Set the webhook URL to `https://YOUR-DOMAIN/api/payments/webhook` and the same secret hash in `FLUTTERWAVE_WEBHOOK_HASH`. Test in sandbox before going live.
 
 ## Deploy
